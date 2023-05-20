@@ -84,7 +84,7 @@ Alejandro = User("Alejandro", "Marrero Garcia", 1997, "CUB", "manko@gmail.com", 
 Andy = User("Andy Daniel", "Matamoros", 1998, "CUB", "rata@gmail.com", "menores13")
 
 Juan.user_ID = 123456789
-Dorian.user_ID = 0000000000
+
 for i in User.all_users:
     print(i)
 
