@@ -1,7 +1,5 @@
-def main():
-    
-    pass
+from bank import *
+from tkinter import *
+from PIL import ImageTk, Image
+from tkinter import messagebox
 
-
-if __name__ == "__main__":
-    main()

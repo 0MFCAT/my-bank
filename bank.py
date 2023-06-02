@@ -1,3 +1,4 @@
+
 from datetime import date
 from random import randint
 
@@ -76,19 +77,20 @@ class Admin(User):
         self._user_ID = new_ID # Se establece el valor del atributo _user_ID
 
 
+def main():
 
+    Juan = Admin("Juan Manuel", "González Vega", 1998, "CUB", "juanmgv98@gmail.com", "QWERTY")
+    Dorian = User("Dorian", "Gay Perez", 1998, "CUB", "dorianperez@gmail.com", "12345")
+    Alejandro = User("Alejandro", "Marrero Garcia", 1997, "CUB", "manko@gmail.com", "axax")
+    Andy = User("Andy Daniel", "Matamoros", 1998, "CUB", "rata@gmail.com", "menores13")
 
-Juan = Admin("Juan Manuel", "González Vega", 1998, "CUB", "juanmgv98@gmail.com", "QWERTY")
-Dorian = User("Dorian", "Gay Perez", 1998, "CUB", "dorianperez@gmail.com", "12345")
-Alejandro = User("Alejandro", "Marrero Garcia", 1997, "CUB", "manko@gmail.com", "axax")
-Andy = User("Andy Daniel", "Matamoros", 1998, "CUB", "rata@gmail.com", "menores13")
+    Juan.user_ID = 123456789
 
-Juan.user_ID = 123456789
+    for i in User.all_users:
+        print(i)
 
-for i in User.all_users:
-    print(i)
-
-
+if __name__ == "__main__":
+    main()
     
 
 
