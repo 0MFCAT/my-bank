@@ -24,14 +24,14 @@ entry2_var = StringVar()
 
 
 # Buttons Functions for loggin
-def login():  # TODO: Make the loggic so at the momment you succesfully log in the system instantiates you with all the properties from the database
+def login():
     user_email = logging_entry1.get()
     user_password = logging_entry2.get()
     if User.logging(user_email, user_password):
         # Get my database values on a variable
-        database_values = db.construct_user(logging_entry1.get(), logging_entry2.get())
+        db_values = db.construct_user(logging_entry1.get(), logging_entry2.get())
         # Create the main user using the data from the database
-        main_user = User(database_values[0][0], database_values[0][1], database_values[0][2], database_values[0][3], database_values[0][4], database_values[0][5])
+        main_user = User(db_values[0][0], db_values[0][1], db_values[0][2], db_values[0][3], db_values[0][4], db_values[0][5])
         messagebox.showinfo("Success!",
                             f"Welcome back {main_user.full_name}")
         logging.destroy()
