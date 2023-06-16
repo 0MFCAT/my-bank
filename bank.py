@@ -1,18 +1,11 @@
-
 from datetime import date
 from random import randint
-
+import database as db
 
 
 class User:
 
     all_users = []
-
-    @staticmethod
-    def generate_id():
-        #TODO: check wether the ID is in use or not
-        return randint(100000000, 999999999) #gives the user a random ID, capacity for 8.999.999.999 users, expandible if necessary
-
 
     def __init__(self, first_name: str, last_name: str, year_of_birth: int, country: str, email: str, password: str):
 
@@ -30,7 +23,6 @@ class User:
         self._age = date.today().year - year_of_birth
         self.country = country
         self.email = email
-        self._user_ID = User.generate_id()
         self._password = password
         self.is_logged = False
 
@@ -46,10 +38,6 @@ class User:
     def age(self):
         return self._age
 
-    @property
-    def user_ID(self):
-        return self._user_ID
-    
     @full_name.setter
     def full_name(self, name):
         first, *last = name.split()
@@ -59,14 +47,21 @@ class User:
     #TODO: Create a Constructor Method to initialize the Users from a CSV file, later migrate it to a SQL database
 
     def __repr__(self):
-        return f'{self.__class__.__name__}("{self.first_name}", "{self.last_name}", {self.year_of_birth}, "{self.country}", "{self.email}", "{self._password}")(ID = {self._user_ID})'
+        return f'{self.__class__.__name__}("{self.first_name}", "{self.last_name}", {self.year_of_birth}, "{self.country}", "{self.email}", "{self._password}")'
 
     @staticmethod
-    def logging(self, email: str, password: str):
-        #TODO: Make the logic to check if the pair email and password match on the database (if there is no match just return false so you can't use the account) and then make the object with all his properties
+    def logging(email: str, password: str):
+        if (email, password) in db.return_loggins():
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def signing(email: str, password: str):
+        #TODO: Make the logic to create a new user in the database
         return True
-        
-    
+
+
 class Admin(User):
 
     all_admins = []
@@ -77,10 +72,22 @@ class Admin(User):
         #Actions
         Admin.all_admins.append(self)
 
-    @User.user_ID.setter
-    def user_ID(self, new_ID: int): # Se agrega el nombre del atributo _user_ID
-        #TODO: implement the logic to check if ID is not in use and is within range
-        self._user_ID = new_ID # Se establece el valor del atributo _user_ID
+
+class Bank_account: #Uses a User object and assign him an ID to make bank transactions
+
+    @staticmethod
+    def generate_id():
+        #TODO: check wether the ID is in use or not
+        return randint(100000000, 999999999) #gives the bank account a random ID, capacity for 8.999.999.999 users, expandible if necessary
+
+    def __init__(self, bank_user: User):
+        self.bank_user = bank_user
+        self._bank_ID = Bank_account.generate_id()
+
+    @property
+    def user_ID(self):
+        return self._bank_ID
+
 
 
 def main():
@@ -90,14 +97,17 @@ def main():
     Alejandro = User("Alejandro", "Marrero Garcia", 1997, "CUB", "manko@gmail.com", "axax")
     Andy = User("Andy Daniel", "Matamoros", 1998, "CUB", "rata@gmail.com", "menores13")
 
-    Juan.user_ID = 123456789
-
     for i in User.all_users:
         print(i)
 
+    main_account = Bank_account(Juan)
+    print(main_account.user_ID)
+    print(main_account.bank_user.full_name)
+
+
 if __name__ == "__main__":
     main()
-    
+
 
 
 
