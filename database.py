@@ -32,9 +32,22 @@ def return_loggins():
     conn.close()
     return data
 
+
+def construct_user(user_email, user_password):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * from users WHERE email = (?) AND password = (?)", (user_email, user_password))
+    data = cursor.fetchall()
+    print(data)
+    conn.close()
+    return data
+
+
 def main():
     pass
-    #create_database()
+    # create_database()
+
+
 '''
     example_users = [
         ("Juan Manuel", "González Vega", 1998, "CUB", "juanmgv98@gmail.com", "QWERTY"),
@@ -51,9 +64,6 @@ def main():
     conn.commit()
     conn.close()
 '''
-
-
-
 
 if __name__ == "__main__":
     main()
