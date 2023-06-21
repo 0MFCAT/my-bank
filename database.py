@@ -38,10 +38,17 @@ def construct_user(user_email, user_password):
     cursor = conn.cursor()
     cursor.execute("SELECT * from users WHERE email = (?) AND password = (?)", (user_email, user_password))
     data = cursor.fetchall()
-    print(data)
     conn.close()
     return data
 
+# TODO: create construct_bank to retrieve the bank object data
+def add_user(first_name, last_name, year_of_birth, country, email, password):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO users VALUES (?,?,?,?,?,?)", (first_name, last_name, year_of_birth, country, email, password))
+
+    conn.commit()
+    conn.close()
 
 def main():
     pass

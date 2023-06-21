@@ -1,4 +1,4 @@
-from bank import *
+import bank as bk
 from tkinter import *
 from tkinter import messagebox
 from tkinter import font
@@ -8,30 +8,33 @@ root.withdraw()  # Hides the root windows until the user logs in
 root.iconbitmap("icon.ico")
 root.title("Global Crypto Bank")
 root.geometry("400x400")
+root.resizable(False, False)
 
 # New font I made for the small and big Labels
 regular_font = font.Font(family="Segoe UI", size=9)
-big_font = font.Font(family="Segoe UI", size=12)
+big_font = font.Font(family="Segoe UI", size=12, underline=True)
 root.option_add("*Font", regular_font)  # Establishing regular_font as the default font for all new widgets
 
 # Creating a logging screen before accessing the bank system
 logging = Toplevel()
-logging.title("Log in please")
+logging.resizable(False, False)
+logging.title("Log in")
+logging.iconbitmap("icon.ico")
 
 # Creating TKinter Variables
 entry1_var = StringVar()
 entry2_var = StringVar()
 
 
-# Buttons Functions for loggin
+# Buttons Functions for login
 def login():
     user_email = logging_entry1.get()
     user_password = logging_entry2.get()
-    if User.logging(user_email, user_password):
-        # Get my database values on a variable
-        db_values = db.construct_user(logging_entry1.get(), logging_entry2.get())
+    db_values = bk.User.logging(user_email, user_password)
+    if db_values:
         # Create the main user using the data from the database
-        main_user = User(db_values[0][0], db_values[0][1], db_values[0][2], db_values[0][3], db_values[0][4], db_values[0][5])
+        main_user = bk.User(db_values[0][0], db_values[0][1], db_values[0][2], db_values[0][3], db_values[0][4],
+                            db_values[0][5])
         messagebox.showinfo("Success!",
                             f"Welcome back {main_user.full_name}")
         logging.destroy()
@@ -44,7 +47,102 @@ def login():
 
 
 def sign_up():
-    pass
+    def sign_up_button():
+        try:
+            bk.User.sign_up(entry3.get(), entry4.get(), int(entry5.get()), entry6.get(), entry7.get(), entry8.get())
+            messagebox.showinfo("You are in", "You successfully created your account")
+            # TODO: close the screen and return to the logging screen
+        except ValueError:
+            messagebox.showerror("Fatal Error", "Please fill all the fields with valid information")
+
+    def sign_cancel_button():
+        toplevel1.destroy()
+        logging.deiconify()
+
+    toplevel1 = Toplevel(root)
+    toplevel1.resizable(False, False)
+    toplevel1.iconbitmap("icon.ico")
+    toplevel1.title("Sign Up")
+    toplevel1.configure(height=300, padx=10, pady=10, width=300)
+    logging.withdraw()
+    label1 = Label(toplevel1)
+    label1.configure(
+        font="{Segoe UI} 12 {underline}",
+        pady=2,
+        state="normal",
+        text='Please Sign Up')
+    label1.grid(column=0, columnspan=3, row=0)
+    labelframe2 = LabelFrame(toplevel1)
+    labelframe2.configure(height=0, padx=0, pady=5)
+    label5 = Label(labelframe2)
+    label5.configure(
+        font="{segoe ui} 9 {}",
+        padx=15,
+        pady=3,
+        text='First name:')
+    label5.grid(column=0, row=0, sticky="w")
+    entry3 = Entry(labelframe2)
+    entry3.configure(borderwidth=3, width=25)
+    entry3.grid(column=0, columnspan=3, padx=35, row=1)
+    label7 = Label(labelframe2)
+    label7.configure(
+        font="{segoe ui} 9 {}",
+        padx=15,
+        pady=3,
+        text='Last name:')
+    label7.grid(column=0, row=2, sticky="w")
+    entry4 = Entry(labelframe2)
+    entry4.configure(borderwidth=3, width=25)
+    entry4.grid(column=0, columnspan=3, padx=35, row=3)
+    label8 = Label(labelframe2)
+    label8.configure(
+        font="{segoe ui} 9 {}",
+        padx=15,
+        pady=3,
+        text='Year of birth:')
+    label8.grid(column=0, row=4, sticky="w")
+    entry5 = Entry(labelframe2)
+    entry5.configure(borderwidth=3, width=25)
+    entry5.grid(column=0, columnspan=3, padx=35, row=5)
+    label9 = Label(labelframe2)
+    label9.configure(
+        font="{segoe ui} 9 {}",
+        padx=15,
+        pady=3,
+        text='Country:')
+    label9.grid(column=0, row=6, sticky="w")
+    entry6 = Entry(labelframe2)
+    entry6.configure(borderwidth=3, width=25)
+    entry6.grid(column=0, columnspan=3, padx=35, row=7)
+    label10 = Label(labelframe2)
+    label10.configure(
+        font="{segoe ui} 9 {}",
+        padx=15,
+        pady=3,
+        text='Email:')
+    label10.grid(column=0, row=8, sticky="w")
+    entry7 = Entry(labelframe2)
+    entry7.configure(borderwidth=3, width=25)
+    entry7.grid(column=0, columnspan=3, padx=35, row=9)
+    label11 = Label(labelframe2)
+    label11.configure(
+        font="{segoe ui} 9 {}",
+        padx=15,
+        pady=3,
+        text='Password:')
+    label11.grid(column=0, row=10, sticky="w")
+    entry8 = Entry(labelframe2)
+    entry8.configure(borderwidth=3, width=25)
+    entry8.grid(column=0, columnspan=3, padx=35, row=11)
+    labelframe2.grid(column=0, columnspan=3, row=1)
+    button2 = Button(toplevel1)
+    button2.configure(text='Sign Up', width=10)
+    button2.grid(column=0, pady=5, row=2)
+    button2.configure(command=sign_up_button)
+    button3 = Button(toplevel1)
+    button3.configure(text='Cancel', width=10)
+    button3.grid(column=2, pady=5, row=2)
+    button3.configure(command=sign_cancel_button)
 
 
 # adding Labels, Entries, a Frame and some Buttons
