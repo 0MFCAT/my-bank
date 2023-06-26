@@ -1,6 +1,8 @@
 from datetime import date
 from random import randint
 import database as db
+import requests
+from CMKapikey import API_KEY
 
 
 class User:
@@ -11,7 +13,7 @@ class User:
         assert len(first_name) < 25, "String length exceeded, max length is 25"
         assert len(last_name) < 25, "String length exceeded, max length is 25"
         assert 0 < year_of_birth < date.today().year, "Must input a valid year"
-        # assert country #TODO: make the attribute country check wether your country initials exists or not and is supported, using a dictionary
+        # assert country #TODO: make the attribute country check whether your country initials exists or not and is supported, using a dictionary
         # assert email #TODO: check if email is valid and is not already taken
         # assert password #TODO: Check if password length is good enough, and if it has the requisites like special characters, uppers and lowers, etc...
 
@@ -62,10 +64,10 @@ class User:
         assert len(first_name) < 25, "String length exceeded, max length is 25"
         assert len(last_name) < 25, "String length exceeded, max length is 25"
         assert 0 < year_of_birth < date.today().year, "Must input a valid year"
-        # assert country #TODO: make the attribute country check wether your country initials exists or not and is supported, using a dictionary
+        # assert country #TODO: make the attribute country check whether your country initials exists or not and is supported, using a dictionary
         # assert email #TODO: check if email is valid and is not already taken
         # assert password #TODO: Check if password length is good enough, and if it has the requisites like special characters, uppers and lowers, etc...
-        # TODO: change the asserts in a way that if the user inputs any wrong value the GUI reeturns him a mensage explaining what went wrong
+        # TODO: change the asserts in a way that if the user inputs any wrong value the GUI returns him a message explaining what went wrong
         try:
             db.add_user(first_name, last_name, year_of_birth, country, email, password)
             # TODO: add the bank data to the table as well and assign the id to the user
@@ -87,18 +89,48 @@ class Admin(User):
 
 class BankAccount:  # Uses a User object and assign him an ID to make bank transactions
 
+    def update_pairs(self):
+        # Calls the CoinMarketCap API to get the equivalent and updated pair values
+        # URL of CoinMarketCap
+        url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
+        params = {'symbol': 'BTC,ETH', 'convert': 'USD'}
+        # replace API_KEY with your personal API
+        headers = {'X-CMC_PRO_API_KEY': API_KEY}
+        response = requests.get(url, params=params, headers=headers)
+        data = response.json()  # Getting the response data
+        self.pairBTC_USD = int(data['data']['BTC']['quote']['USD']['price'])
+        self.pairETH_USD = int(data['data']['ETH']['quote']['USD']['price'])
+
     @staticmethod
     def generate_id():
-        # TODO: check wether the ID is in use or not
+        # TODO: check whether the ID is in use or not
         # gives the bank account a random ID, capacity for 8.999.999.999 users, expandible
         # if necessary
         return randint(100000000, 999999999)
 
-    def __init__(self, bank_user: User):
+    def __init__(self, bank_user: User, bank_id: int, cup: float, usd: float, usdt: float, btc: float, eth: float):
         self.bank_user = bank_user
-        self._bank_ID = BankAccount.generate_id()
+        self._bank_ID = bank_id
+        self.cup = cup
+        self.usd = usd
+        self.usdt = usdt
+        self.btc = btc
+        self.eth = eth
+        self.pairUSD_CUP = 200
+        self.pairBTC_USD = 0  # will be updated with update_pairs()
+        self.pairETH_USD = 0  # will be updated with update_pairs()
+        self.pairUSDT_USD = 1
+        self.update_pairs()
 
     @property
     def user_id(self):
         return self._bank_ID
 
+    @staticmethod
+    def inst_bank(user_email):
+        db_values = db.construct_bank_user(user_email)
+        return db_values
+
+    def total_value_usd(self):
+        value = (self.cup / self.pairUSD_CUP) + self.usd + self.usdt + (self.btc * self.pairBTC_USD) + (self.eth * self.pairETH_USD)
+        return value

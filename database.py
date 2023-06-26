@@ -50,27 +50,53 @@ def add_user(first_name, last_name, year_of_birth, country, email, password):
     conn.commit()
     conn.close()
 
-def main():
-    pass
-    # create_database()
 
-
-'''
-    example_users = [
-        ("Juan Manuel", "González Vega", 1998, "CUB", "juanmgv98@gmail.com", "QWERTY"),
-        ("Dorian", "Gay Perez", 1998, "CUB", "dorianperez@gmail.com", "12345"),
-        ("Alejandro", "Marrero Garcia", 1997, "CUB", "manko@gmail.com", "axax"),
-        ("Andy Daniel", "Matamoros", 1998, "CUB", "rata@gmail.com", "menores13")
-    ]
+def construct_bank_user(email):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.executemany("INSERT INTO users VALUES (?,?,?,?,?,?)", example_users)
+    cursor.execute("SELECT * from bank_data WHERE email = (?)", (email,))
+    data = cursor.fetchall()
+    conn.close()
+    return data[0][0:6] #Returns the tuple as a list ignoring the email column at the end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def main():
+    conn = sqlite3.connect("database.db")
+    c = conn.cursor()
+    #c.execute("DELETE from users WHERE rowid = 6")
+
+    c.execute("SELECT * FROM users")
+    items = c.fetchall()
+    for item in items:
+        print(item)
+
+    print("\n")
+    c.execute("SELECT * FROM bank_data")
+    items = c.fetchall()
+    for item in items:
+        print(item)
 
 
     conn.commit()
     conn.close()
-'''
+
+
 
 if __name__ == "__main__":
     main()

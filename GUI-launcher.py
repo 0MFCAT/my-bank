@@ -2,13 +2,88 @@ import bank as bk
 from tkinter import *
 from tkinter import messagebox
 from tkinter import font
+from PIL import ImageTk, Image
 
 root = Tk()
 root.withdraw()  # Hides the root windows until the user logs in
 root.iconbitmap("icon.ico")
 root.title("Global Crypto Bank")
-root.geometry("400x400")
 root.resizable(False, False)
+my_img = ImageTk.PhotoImage(Image.open("icon.ico"))  # Loads the logo of the bank
+
+
+def bank_gui(main_bank_user, img):
+    # Main Screen after the login, not the cleanest execution but the easiest way to make it
+    # Next time I'll make everything right from the scratch
+    root.configure(height=200, padx=5, pady=5, width=200)
+    labelframe1 = LabelFrame(root)
+    labelframe1.configure(height=200, padx=10, pady=5, width=300)
+    label0 = Label(labelframe1)
+    label0.configure(image=img)
+    label0.grid(column=0, pady="0 10", row=0, rowspan=2)
+    label1 = Label(labelframe1)
+    label1.configure(text=main_bank_user.bank_user.full_name)
+    label1.grid(column=1, row=0)
+    label2 = Label(labelframe1)
+    label2.configure(text=f"ID: {main_bank_user.user_id}")
+    label2.grid(column=1, row=1)
+    label4 = Label(labelframe1)
+    label4.configure(text=f'USD: {main_bank_user.usd}')
+    label4.grid(column=0, columnspan=1, row=3, sticky="w")
+    label5 = Label(labelframe1)
+    label5.configure(text=f'USDT: {main_bank_user.usdt}')
+    label5.grid(column=0, row=4, sticky="w")
+    label6 = Label(labelframe1)
+    label6.configure(text=f'BTC: {main_bank_user.btc}')
+    label6.grid(column=0, row=5, sticky="w")
+    label7 = Label(labelframe1)
+    label7.configure(text=f'ETH: {main_bank_user.eth}')
+    label7.grid(column=0, row=6, sticky="w")
+    labelframe3 = LabelFrame(labelframe1)
+    labelframe3.configure(height=200, width=200)
+    label8 = Label(labelframe3)
+    label8.configure(font="{segoe ui} 12 {}", state="normal", text='Exchange Pairs', width=18)
+    label8.grid(row=0)
+    label9 = Label(labelframe3)
+    label9.configure(text=f'USD/CUP = {main_bank_user.pairUSD_CUP}', width=18)
+    label9.grid(column=0, row=1)
+    label10 = Label(labelframe3)
+    label10.configure(text=f'BTC/USDT = {main_bank_user.pairBTC_USD}', width=18)
+    label10.grid(column=0, row=2)
+    label11 = Label(labelframe3)
+    label11.configure(text=f'ETH/USDT = {main_bank_user.pairETH_USD}', width=18)
+    label11.grid(column=0, row=3)
+    label14 = Label(labelframe3)
+    label14.configure(text=f'USDT/USD = {main_bank_user.pairUSDT_USD}', width=18)
+    label14.grid(column=0, row=4)
+    labelframe3.grid(column=2, columnspan=2, row=2, rowspan=5)
+    label12 = Label(labelframe1)
+    label12.configure(text='Total amount (USDT)')
+    label12.grid(column=3, padx=5, row=0)
+    label13 = Label(labelframe1)
+    label13.configure(text=f'CUP: {main_bank_user.cup}')
+    label13.grid(column=0, row=2, sticky="w")
+    label15 = Label(labelframe1)
+    label15.configure(text=f'${main_bank_user.total_value_usd()}')
+    label15.grid(column=3, row=1, sticky="n")
+    labelframe1.grid(column=0, columnspan=4, row=0)
+    button1 = Button(root)
+    button1.configure(
+        justify="left",
+        overrelief="flat",
+        text='Exchange',
+        width=7)
+    button1.grid(column=0, padx=5, pady=5, row=1)
+    button2 = Button(root)
+    button2.configure(text='Send', width=7)
+    button2.grid(column=1, padx=5, pady=5, row=1)
+    button3 = Button(root)
+    button3.configure(text='Stake', width=7)
+    button3.grid(column=2, padx=5, pady=5, row=1)
+    button4 = Button(root)
+    button4.configure(text='Log Out', width=7)
+    button4.grid(column=3, padx=5, pady=5, row=1)
+
 
 # New font I made for the small and big Labels
 regular_font = font.Font(family="Segoe UI", size=9)
@@ -32,12 +107,16 @@ def login():
     user_password = logging_entry2.get()
     db_values = bk.User.logging(user_email, user_password)
     if db_values:
-        # Create the main user using the data from the database
+        # Creates the main user using the data from the database
         main_user = bk.User(db_values[0][0], db_values[0][1], db_values[0][2], db_values[0][3], db_values[0][4],
                             db_values[0][5])
         messagebox.showinfo("Success!",
                             f"Welcome back {main_user.full_name}")
+        # Creates the main bank user with all the financial data from the database
+        bank_values = bk.BankAccount.inst_bank(user_email)
+        main_bank_user = bk.BankAccount(main_user, *bank_values)
         logging.destroy()
+        bank_gui(main_bank_user, my_img)
         root.deiconify()  # Shows the previously hidden root window using withdraw()
 
     else:
@@ -52,6 +131,8 @@ def sign_up():
             bk.User.sign_up(entry3.get(), entry4.get(), int(entry5.get()), entry6.get(), entry7.get(), entry8.get())
             messagebox.showinfo("You are in", "You successfully created your account")
             # TODO: close the screen and return to the logging screen
+            toplevel1.destroy()
+            logging.deiconify()
         except ValueError:
             messagebox.showerror("Fatal Error", "Please fill all the fields with valid information")
 
@@ -150,7 +231,7 @@ logging_label1 = Label(logging, font=big_font, text="Please Log In")
 logging_frame = LabelFrame(logging, padx=10, pady=3)
 logging_label2 = Label(logging_frame, text="Email:", padx=10)
 logging_entry1 = Entry(logging_frame, width=30, bd=3,
-                       textvariable=entry1_var)  # I create a textvariable to control the text of the Entry
+                       textvariable=entry1_var)  # I create a variable to control the text of the Entry
 logging_label3 = Label(logging_frame, text="Password:", padx=10)
 logging_entry2 = Entry(logging_frame, width=30, bd=3, textvariable=entry2_var)
 
