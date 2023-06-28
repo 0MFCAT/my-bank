@@ -2,6 +2,8 @@ from datetime import date
 from random import randint
 import database as db
 import requests
+from custom_errors import *
+
 from CMKapikey import API_KEY
 
 
@@ -90,6 +92,7 @@ class Admin(User):
 class BankAccount:  # Uses a User object and assign him an ID to make bank transactions
 
     def update_pairs(self):
+        # TODO: UNDO THIS
         # Calls the CoinMarketCap API to get the equivalent and updated pair values
         # URL of CoinMarketCap
         url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
@@ -132,5 +135,16 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         return db_values
 
     def total_value_usd(self):
-        value = (self.cup / self.pairUSD_CUP) + self.usd + self.usdt + (self.btc * self.pairBTC_USD) + (self.eth * self.pairETH_USD)
+        value = (self.cup / self.pairUSD_CUP) + self.usd + self.usdt + (self.btc * self.pairBTC_USD) + (
+                    self.eth * self.pairETH_USD)
         return value
+
+    def send_usd(self, value: float, receiver_id: int):
+        if value >= self.usd:
+            raise NoBalance("Not enough balance for that transaction")
+        if len(str(receiver_id)) != 9:
+            raise WrongFormatID("ID must be a unique number of 9 digits")
+        if not db.check_id(receiver_id):
+            raise WrongID("The receiver ID doesn't exist")
+        db.send(value, self.user_id, receiver_id)
+

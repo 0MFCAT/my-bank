@@ -1,8 +1,10 @@
+import requests.exceptions
 import bank as bk
 from tkinter import *
 from tkinter import messagebox
 from tkinter import font
 from PIL import ImageTk, Image
+from custom_errors import *
 
 root = Tk()
 root.withdraw()  # Hides the root windows until the user logs in
@@ -15,6 +17,59 @@ my_img = ImageTk.PhotoImage(Image.open("icon.ico"))  # Loads the logo of the ban
 def bank_gui(main_bank_user, img):
     # Main Screen after the login, not the cleanest execution but the easiest way to make it
     # Next time I'll make everything right from the scratch
+    def send():
+
+        def cancel():
+            toplevel_1.destroy()
+            root.attributes("-disabled", False)
+
+        def send_confirm():
+            try:
+                # sends USD from main account to another account using the bank ID
+                main_bank_user.send_usd(float(entry_2.get()), int(entry_3.get()))
+                # TODO: fix the window so it doesn't minimize after enabling it again
+                messagebox.showinfo("Successful transaction", f"You have successfully sent {entry_2.get()} to the bank user with the ID: {entry_3.get()}") # TODO: Check This
+                cancel()
+            except NoBalance:
+                messagebox.showerror("Not enough balance", "Insufficient founds for that transaction")
+            except ValueError:
+                messagebox.showerror("Wrong input", "The fields should contain valid numbers")
+            except WrongFormatID:
+                messagebox.showerror("ID Error", "ID must be a unique number of 9 digits")
+            except WrongID:
+                messagebox.showerror("ID Error", "The receiver ID doesn't exist")
+
+        root.attributes("-disabled", True)
+        toplevel_1 = Tk()
+        toplevel_1.title("Send USD")
+        toplevel_1.resizable(False, False)
+        toplevel_1.configure(height=200, padx=10, pady=10, width=200)
+        labelframe_1 = LabelFrame(toplevel_1)
+        labelframe_1.configure(height=200, padx=10, pady=10, width=200)
+        label_2 = Label(labelframe_1)
+        label_2.configure(text='USD to send', width=10)
+        label_2.grid(column=0, row=0)
+        entry_2 = Entry(labelframe_1)
+        entry_2.configure(justify="center", width=12)
+        entry_2.grid(column=0, padx=10, pady=7, row=1)
+        button_2 = Button(labelframe_1)
+        button_2.configure(text='Send', command=send_confirm, width=5)
+        button_2.grid(column=0, columnspan=2, pady=7, row=2)
+        label_3 = Label(labelframe_1)
+        label_3.configure(text='User ID', width=10)
+        label_3.grid(column=1, row=0)
+        entry_3 = Entry(labelframe_1)
+        entry_3.configure(justify="center", width=12)
+        entry_3.grid(column=1, padx=10, pady=5, row=1)
+        button_3 = Button(labelframe_1)
+        button_3.configure(text='Cancel', command=cancel)
+        button_3.grid(column=0, columnspan=2, pady="7 0", row=3)
+        labelframe_1.grid(column=0, row=0)
+
+    def logout():
+        root.withdraw()
+        logging.deiconify()
+
     root.configure(height=200, padx=5, pady=5, width=200)
     labelframe1 = LabelFrame(root)
     labelframe1.configure(height=200, padx=10, pady=5, width=300)
@@ -75,13 +130,13 @@ def bank_gui(main_bank_user, img):
         width=7)
     button1.grid(column=0, padx=5, pady=5, row=1)
     button2 = Button(root)
-    button2.configure(text='Send', width=7)
+    button2.configure(text='Send', width=7, command=send)
     button2.grid(column=1, padx=5, pady=5, row=1)
     button3 = Button(root)
     button3.configure(text='Stake', width=7)
     button3.grid(column=2, padx=5, pady=5, row=1)
     button4 = Button(root)
-    button4.configure(text='Log Out', width=7)
+    button4.configure(text='Log Out', width=7, command=logout)
     button4.grid(column=3, padx=5, pady=5, row=1)
 
 
@@ -110,15 +165,19 @@ def login():
         # Creates the main user using the data from the database
         main_user = bk.User(db_values[0][0], db_values[0][1], db_values[0][2], db_values[0][3], db_values[0][4],
                             db_values[0][5])
-        messagebox.showinfo("Success!",
-                            f"Welcome back {main_user.full_name}")
-        # Creates the main bank user with all the financial data from the database
         bank_values = bk.BankAccount.inst_bank(user_email)
-        main_bank_user = bk.BankAccount(main_user, *bank_values)
-        logging.destroy()
-        bank_gui(main_bank_user, my_img)
-        root.deiconify()  # Shows the previously hidden root window using withdraw()
-
+        try:
+            # Creates the main bank user with all the financial data from the database
+            main_bank_user = bk.BankAccount(main_user, *bank_values)
+            messagebox.showinfo("Success!",
+                                f"Welcome back {main_user.full_name}")
+            logging.withdraw()
+            entry1_var.set("")
+            entry2_var.set("")
+            bank_gui(main_bank_user, my_img)
+            root.deiconify()  # Shows the previously hidden root window using withdraw()
+        except requests.exceptions.ConnectionError:
+            messagebox.showerror("Connection Error", "You must be online to log in")
     else:
         entry1_var.set("")
         entry2_var.set("")
