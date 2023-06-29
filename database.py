@@ -41,11 +41,13 @@ def construct_user(user_email, user_password):
     conn.close()
     return data
 
+
 # TODO: create construct_bank to retrieve the bank object data
 def add_user(first_name, last_name, year_of_birth, country, email, password):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO users VALUES (?,?,?,?,?,?)", (first_name, last_name, year_of_birth, country, email, password))
+    cursor.execute("INSERT INTO users VALUES (?,?,?,?,?,?)",
+                   (first_name, last_name, year_of_birth, country, email, password))
 
     conn.commit()
     conn.close()
@@ -85,24 +87,25 @@ def add_usd(value, receiver_id):
     conn.close()
 
 
-def check_id(ID):
+def check_id(bank_id):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM bank_data WHERE bank_id = (?)", (ID,))
+    cursor.execute("SELECT * FROM bank_data WHERE bank_id = (?)", (bank_id,))
     data = cursor.fetchone()
     return data is not None
 
 
-
-
-
-
-
+def initialize_bank_data(bank_id, email):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO bank_data VALUES (?, 0, 0, 0, 0, 0, ?)", (bank_id, email))
+    conn.commit()
+    conn.close()
 
 def main():
     conn = sqlite3.connect("database.db")
     c = conn.cursor()
-    #c.execute("DELETE from users WHERE rowid = 6")
+    # c.execute("DELETE from users WHERE rowid = 6")
 
     c.execute("SELECT * FROM users")
     items = c.fetchall()
@@ -117,7 +120,6 @@ def main():
 
     conn.commit()
     conn.close()
-
 
 
 if __name__ == "__main__":

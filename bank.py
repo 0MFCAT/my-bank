@@ -134,6 +134,11 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         db_values = db.construct_bank_user(user_email)
         return db_values
 
+    @staticmethod
+    def initialize_bank(bank_user):
+        bank_id = BankAccount.generate_id()
+        db.initialize_bank_data(bank_id, bank_user)
+
     def total_value_usd(self):
         value = (self.cup / self.pairUSD_CUP) + self.usd + self.usdt + (self.btc * self.pairBTC_USD) + (
                     self.eth * self.pairETH_USD)

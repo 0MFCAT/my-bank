@@ -188,6 +188,7 @@ def sign_up():
     def sign_up_button():
         try:
             bk.User.sign_up(entry3.get(), entry4.get(), int(entry5.get()), entry6.get(), entry7.get(), entry8.get())
+            bk.BankAccount.initialize_bank(entry7.get())
             messagebox.showinfo("You are in", "You successfully created your account")
             # TODO: close the screen and return to the logging screen
             toplevel1.destroy()
