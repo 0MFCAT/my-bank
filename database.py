@@ -23,8 +23,18 @@ def create_database():
     conn.commit()
     conn.close()
 
+def create_stake_database():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE stake_data(
+                bank_id integer,
+                USD_staked real,
+                date text
+                )""")
+    conn.commit()
+    conn.close()
 
-def return_loggins():
+def return_logins():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute("SELECT email, password FROM users")
@@ -53,10 +63,10 @@ def add_user(first_name, last_name, year_of_birth, country, email, password):
     conn.close()
 
 
-def construct_bank_user(email):
+def retrieve_bank_user_data(user_email):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM bank_data WHERE email = (?)", (email,))
+    cursor.execute("SELECT * FROM bank_data WHERE email = (?)", (user_email,))
     data = cursor.fetchall()
     conn.close()
     return data[0][0:6]  # Returns the tuple as a list ignoring the email column at the end
@@ -102,6 +112,40 @@ def initialize_bank_data(bank_id, email):
     conn.commit()
     conn.close()
 
+
+def to_usd(bank_id, coin, value_coin, value_usd):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT {coin} FROM bank_data WHERE bank_id = (?)", (bank_id,))
+    subs_value = cursor.fetchone()[0] - value_coin
+    cursor.execute(f"UPDATE bank_data SET {coin} = (?) WHERE bank_id = (?)", (subs_value, bank_id))
+    conn.commit()
+    conn.close()
+    add_usd(value_usd, bank_id)
+
+
+def from_usd(bank_id, coin, value_coin, value_usd):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT {coin} FROM bank_data WHERE bank_id = (?)", (bank_id,))
+    add_value = cursor.fetchone()[0] + value_coin
+    cursor.execute(f"UPDATE bank_data SET {coin} = (?) WHERE bank_id = (?)", (add_value, bank_id))
+    conn.commit()
+    conn.close()
+    spend_usd(value_usd, bank_id)
+
+
+def update_values(user_email):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM bank_data WHERE email = (?)", (user_email,))
+    data = cursor.fetchall()
+    conn.close()
+    return data[0][1:6]  # Returns the tuple as a list ignoring the email column at the end
+
+def start_staking():
+    pass
+
 def main():
     conn = sqlite3.connect("database.db")
     c = conn.cursor()
@@ -118,6 +162,7 @@ def main():
     for item in items:
         print(item)
 
+    create_stake_database()
     conn.commit()
     conn.close()
 

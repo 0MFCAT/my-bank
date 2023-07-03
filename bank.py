@@ -47,14 +47,12 @@ class User:
         self.first_name = first
         self.last_name = " ".join(last)
 
-    # TODO: Create a Constructor Method to initialize the Users from a CSV file, later migrate it to a SQL database
-
     def __repr__(self):
         return f'{self.__class__.__name__}("{self.first_name}", "{self.last_name}", {self.year_of_birth}, "{self.country}", "{self.email}", "{self._password}")'
 
     @staticmethod
     def logging(email: str, password: str):
-        if (email, password) in db.return_loggins():
+        if (email, password) in db.return_logins():
             # Get my database values on a variable
             db_values = db.construct_user(email, password)
             return db_values
@@ -93,7 +91,8 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
 
     def update_pairs(self):
         # TODO: UNDO THIS
-        # Calls the CoinMarketCap API to get the equivalent and updated pair values
+
+        '''# Calls the CoinMarketCap API to get the equivalent and updated pair values
         # URL of CoinMarketCap
         url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
         params = {'symbol': 'BTC,ETH', 'convert': 'USD'}
@@ -102,7 +101,9 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         response = requests.get(url, params=params, headers=headers)
         data = response.json()  # Getting the response data
         self.pairBTC_USD = int(data['data']['BTC']['quote']['USD']['price'])
-        self.pairETH_USD = int(data['data']['ETH']['quote']['USD']['price'])
+        self.pairETH_USD = int(data['data']['ETH']['quote']['USD']['price'])'''
+        self.pairBTC_USD = 30000
+        self.pairETH_USD = 1000
 
     @staticmethod
     def generate_id():
@@ -131,7 +132,7 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
 
     @staticmethod
     def inst_bank(user_email):
-        db_values = db.construct_bank_user(user_email)
+        db_values = db.retrieve_bank_user_data(user_email)
         return db_values
 
     @staticmethod
@@ -152,4 +153,54 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         if not db.check_id(receiver_id):
             raise WrongID("The receiver ID doesn't exist")
         db.send(value, self.user_id, receiver_id)
+
+    def exchange_to_usd(self, coin: str, value: float):
+        if coin == "CUP":
+            if value >= self.cup:
+                raise NoBalance("Not enough balance for that transaction")
+            value_usd = value / 200
+        elif coin == "USDT":
+            if value >= self.usdt:
+                raise NoBalance("Not enough balance for that transaction")
+            value_usd = value
+        elif coin == "BTC":
+            if value >= self.btc:
+                raise NoBalance("Not enough balance for that transaction")
+            value_usd = value * self.pairBTC_USD
+        elif coin == "ETH":
+            if value >= self.eth:
+                raise NoBalance("Not enough balance for that transaction")
+            value_usd = value * self.pairETH_USD
+
+        db.to_usd(self._bank_ID, coin, value, value_usd)
+
+    def exchange_from_usd(self, coin: str, value_usd: float):
+        if value_usd > self.usd:
+            raise NoBalance("Not enough balance for that transaction")
+        if coin == "CUP":
+            value = value_usd * 200
+        elif coin == "USDT":
+            value = value_usd
+        elif coin == "BTC":
+            value = value_usd / self.pairBTC_USD
+        elif coin == "ETH":
+            value = value_usd / self.pairETH_USD
+
+        db.from_usd(self._bank_ID, coin, value, value_usd)
+
+    def update_coin_values(self):
+        cup, usd, usdt, btc, eth = db.update_values(self.bank_user.email)
+        self.cup = cup
+        self.usd = usd
+        self.usdt = usdt
+        self.btc = btc
+        self.eth = eth
+
+    def stake(self):
+        pass
+
+
+
+
+
 

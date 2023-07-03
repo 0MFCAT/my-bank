@@ -1,3 +1,4 @@
+
 import requests.exceptions
 import bank as bk
 from tkinter import *
@@ -5,6 +6,7 @@ from tkinter import messagebox
 from tkinter import font
 from PIL import ImageTk, Image
 from custom_errors import *
+from exchange_gui import *
 
 root = Tk()
 root.withdraw()  # Hides the root windows until the user logs in
@@ -17,11 +19,17 @@ my_img = ImageTk.PhotoImage(Image.open("icon.ico"))  # Loads the logo of the ban
 def bank_gui(main_bank_user, img):
     # Main Screen after the login, not the cleanest execution but the easiest way to make it
     # Next time I'll make everything right from the scratch
+
+    def exchange():
+        root.attributes("-disabled", True)
+        exchange_window = Exchange_GUI(main_bank_user, root)
+        exchange_window.run()
+
     def send():
 
         def cancel():
-            toplevel_1.destroy()
             root.attributes("-disabled", False)
+            toplevel_1.destroy()
 
         def send_confirm():
             try:
@@ -39,8 +47,13 @@ def bank_gui(main_bank_user, img):
             except WrongID:
                 messagebox.showerror("ID Error", "The receiver ID doesn't exist")
 
+        def close_wind():
+            root.attributes("-disabled", False)
+            toplevel_1.destroy()
+
         root.attributes("-disabled", True)
         toplevel_1 = Tk()
+        toplevel_1.protocol("WM_DELETE_WINDOW", close_wind)
         toplevel_1.title("Send USD")
         toplevel_1.resizable(False, False)
         toplevel_1.configure(height=200, padx=10, pady=10, width=200)
@@ -66,11 +79,26 @@ def bank_gui(main_bank_user, img):
         button_3.grid(column=0, columnspan=2, pady="7 0", row=3)
         labelframe_1.grid(column=0, row=0)
 
+    def stake():
+        pass
+
     def logout():
         root.withdraw()
         logging.deiconify()
 
+    def update_values():
+        # Updating the text values
+        main_bank_user.update_coin_values()
+        label4.configure(text=f'USD: {main_bank_user.usd}')
+        label5.configure(text=f'USDT: {main_bank_user.usdt}')
+        label6.configure(text=f'BTC: {main_bank_user.btc}')
+        label7.configure(text=f'ETH: {main_bank_user.eth}')
+        label13.configure(text=f'CUP: {main_bank_user.cup}')
+        label15.configure(text=f'${main_bank_user.total_value_usd()}')
+        root.after(1000, update_values)
+
     root.configure(height=200, padx=5, pady=5, width=200)
+    root.after(1000, update_values)
     labelframe1 = LabelFrame(root)
     labelframe1.configure(height=200, padx=10, pady=5, width=300)
     label0 = Label(labelframe1)
@@ -123,17 +151,13 @@ def bank_gui(main_bank_user, img):
     label15.grid(column=3, row=1, sticky="n")
     labelframe1.grid(column=0, columnspan=4, row=0)
     button1 = Button(root)
-    button1.configure(
-        justify="left",
-        overrelief="flat",
-        text='Exchange',
-        width=7)
+    button1.configure(text='Exchange', width=7, command=exchange)
     button1.grid(column=0, padx=5, pady=5, row=1)
     button2 = Button(root)
     button2.configure(text='Send', width=7, command=send)
     button2.grid(column=1, padx=5, pady=5, row=1)
     button3 = Button(root)
-    button3.configure(text='Stake', width=7)
+    button3.configure(text='Stake', width=7, command=stake)
     button3.grid(column=2, padx=5, pady=5, row=1)
     button4 = Button(root)
     button4.configure(text='Log Out', width=7, command=logout)
