@@ -1,10 +1,11 @@
 
-import requests.exceptions
-import bank as bk
 from tkinter import *
-from tkinter import messagebox
-from tkinter import font
-from PIL import ImageTk, Image
+from tkinter import font, messagebox
+
+import requests.exceptions
+from PIL import Image, ImageTk
+
+import bank as bk
 from custom_errors import *
 from exchange_gui import *
 
@@ -84,6 +85,7 @@ def bank_gui(main_bank_user, img):
             main_bank_user.stake(10)  # TODO: Make this a whole interface, now just testing
         except StakeError:
             messagebox.showerror("Stake Error", "You can't stake more than 1 time per account, need to unstake first")
+
     def logout():
         root.withdraw()
         logging.deiconify()
@@ -199,7 +201,7 @@ def login():
                                 f"Welcome back {main_user.full_name}")
             logging.withdraw()
             entry1_var.set("")
-            entry2_var.set("")
+            entry2_var.set("")  #Hola
             bank_gui(main_bank_user, my_img)
             root.deiconify()  # Shows the previously hidden root window using withdraw()
         except requests.exceptions.ConnectionError:
@@ -316,8 +318,7 @@ def sign_up():
 logging_label1 = Label(logging, font=big_font, text="Please Log In")
 logging_frame = LabelFrame(logging, padx=10, pady=3)
 logging_label2 = Label(logging_frame, text="Email:", padx=10)
-logging_entry1 = Entry(logging_frame, width=30, bd=3,
-                       textvariable=entry1_var)  # I create a variable to control the text of the Entry
+logging_entry1 = Entry(logging_frame, width=30, bd=3, textvariable=entry1_var)  # I create a variable to control the text of the Entry
 logging_label3 = Label(logging_frame, text="Password:", padx=10)
 logging_entry2 = Entry(logging_frame, width=30, bd=3, textvariable=entry2_var)
 

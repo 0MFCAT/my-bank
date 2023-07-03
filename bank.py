@@ -1,10 +1,11 @@
 import datetime
 from random import randint
-import database as db
-import requests
-from custom_errors import *
 
+import requests
+
+import database as db
 from CMKapikey import API_KEY
+from custom_errors import *
 
 
 class User:
