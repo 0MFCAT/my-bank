@@ -1,4 +1,4 @@
-from datetime import date
+import datetime
 from random import randint
 import database as db
 import requests
@@ -14,7 +14,7 @@ class User:
 
         assert len(first_name) < 25, "String length exceeded, max length is 25"
         assert len(last_name) < 25, "String length exceeded, max length is 25"
-        assert 0 < year_of_birth < date.today().year, "Must input a valid year"
+        assert 0 < year_of_birth < datetime.date.today().year, "Must input a valid year"
         # assert country #TODO: make the attribute country check whether your country initials exists or not and is supported, using a dictionary
         # assert email #TODO: check if email is valid and is not already taken
         # assert password #TODO: Check if password length is good enough, and if it has the requisites like special characters, uppers and lowers, etc...
@@ -23,7 +23,7 @@ class User:
         self.last_name = last_name
         self._full_name = f"{first_name} {last_name}"  # Property TODO: chequear por que esto da error si le quito la _
         self.year_of_birth = year_of_birth
-        self._age = date.today().year - year_of_birth
+        self._age = datetime.date.today().year - year_of_birth
         self.country = country
         self.email = email
         self._password = password
@@ -63,7 +63,7 @@ class User:
     def sign_up(first_name: str, last_name: str, year_of_birth: int, country: str, email: str, password: str):
         assert len(first_name) < 25, "String length exceeded, max length is 25"
         assert len(last_name) < 25, "String length exceeded, max length is 25"
-        assert 0 < year_of_birth < date.today().year, "Must input a valid year"
+        assert 0 < year_of_birth < datetime.date.today().year, "Must input a valid year"
         # assert country #TODO: make the attribute country check whether your country initials exists or not and is supported, using a dictionary
         # assert email #TODO: check if email is valid and is not already taken
         # assert password #TODO: Check if password length is good enough, and if it has the requisites like special characters, uppers and lowers, etc...
@@ -196,8 +196,11 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         self.btc = btc
         self.eth = eth
 
-    def stake(self):
-        pass
+    def stake(self, value_usd):
+        date = datetime.datetime.now().isoformat()
+        print(date)
+        db.start_staking(self._bank_ID, value_usd, date)
+
 
 
 

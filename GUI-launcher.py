@@ -79,9 +79,11 @@ def bank_gui(main_bank_user, img):
         button_3.grid(column=0, columnspan=2, pady="7 0", row=3)
         labelframe_1.grid(column=0, row=0)
 
-    def stake():
-        pass
-
+    def stake_button():
+        try:
+            main_bank_user.stake(10)  # TODO: Make this a whole interface, now just testing
+        except StakeError:
+            messagebox.showerror("Stake Error", "You can't stake more than 1 time per account, need to unstake first")
     def logout():
         root.withdraw()
         logging.deiconify()
@@ -157,7 +159,7 @@ def bank_gui(main_bank_user, img):
     button2.configure(text='Send', width=7, command=send)
     button2.grid(column=1, padx=5, pady=5, row=1)
     button3 = Button(root)
-    button3.configure(text='Stake', width=7, command=stake)
+    button3.configure(text='Stake', width=7, command=stake_button)
     button3.grid(column=2, padx=5, pady=5, row=1)
     button4 = Button(root)
     button4.configure(text='Log Out', width=7, command=logout)

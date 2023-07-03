@@ -1,5 +1,5 @@
 import sqlite3
-
+from custom_errors import *
 
 def create_database():
     conn = sqlite3.connect("database.db")
@@ -143,7 +143,22 @@ def update_values(user_email):
     conn.close()
     return data[0][1:6]  # Returns the tuple as a list ignoring the email column at the end
 
-def start_staking():
+
+def start_staking(bank_id, value_usd, date):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM stake_data WHERE bank_id = (?)", (bank_id,))
+    data_exist = cursor.fetchall()
+    if not data_exist:
+        cursor.execute("INSERT INTO stake_data VALUES (?,?,?)", (bank_id, value_usd, date))
+    else:
+        raise StakeError("You can't stake more than 1 time per account, need to unstake first")
+    conn.commit()
+    conn.close()
+
+
+def return_staked_value():
+    # TODO: just make this
     pass
 
 def main():
@@ -162,7 +177,6 @@ def main():
     for item in items:
         print(item)
 
-    create_stake_database()
     conn.commit()
     conn.close()
 
