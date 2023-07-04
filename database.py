@@ -155,11 +155,25 @@ def start_staking(bank_id, value_usd, date):
         raise StakeError("You can't stake more than 1 time per account, need to unstake first")
     conn.commit()
     conn.close()
+    spend_usd(value_usd, bank_id)
+    
 
+def return_staked_value(bank_id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT USD_staked, date FROM stake_data WHERE bank_id = (?)", (bank_id,))
+    data = cursor.fetchall()
+    if data:
+        cursor.execute("DELETE from stake_data WHERE bank_id = (?)", (bank_id,))
+        conn.commit()
+        conn.close()
+        return data[0]
+    else:
+        conn.close()
+        raise StakeError("There is no staked value on the given ID")
 
-def return_staked_value():
-    # TODO: just make this
-    pass
+    
+
 
 def main():
     conn = sqlite3.connect("database.db")

@@ -168,12 +168,12 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
             if value >= self.btc:
                 raise NoBalance("Not enough balance for that transaction")
             value_usd = value * self.pairBTC_USD
-        elif coin == "ETH":
+        else:  # ETH case
             if value >= self.eth:
                 raise NoBalance("Not enough balance for that transaction")
             value_usd = value * self.pairETH_USD
 
-        db.to_usd(self._bank_ID, coin, value, value_usd)
+        db.to_usd(self.user_id, coin, value, value_usd)
 
     def exchange_from_usd(self, coin: str, value_usd: float):
         if value_usd > self.usd:
@@ -184,10 +184,10 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
             value = value_usd
         elif coin == "BTC":
             value = value_usd / self.pairBTC_USD
-        elif coin == "ETH":
+        else:  # ETH case
             value = value_usd / self.pairETH_USD
 
-        db.from_usd(self._bank_ID, coin, value, value_usd)
+        db.from_usd(self.user_id, coin, value, value_usd)
 
     def update_coin_values(self):
         cup, usd, usdt, btc, eth = db.update_values(self.bank_user.email)
@@ -202,7 +202,8 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         print(date)
         db.start_staking(self._bank_ID, value_usd, date)
 
-
+    def return_stake(self):
+        value, = db.return_staked_value(self.user_id)
 
 
 
