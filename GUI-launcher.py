@@ -83,6 +83,7 @@ def bank_gui(main_bank_user, img):
     def stake_button():
         try:
             main_bank_user.stake(10)  # TODO: Make this a whole interface, now just testing
+            #main_bank_user.return_stake()
         except StakeError:
             messagebox.showerror("Stake Error", "You can't stake more than 1 time per account, need to unstake first")
 

@@ -90,6 +90,8 @@ class Admin(User):
 
 class BankAccount:  # Uses a User object and assign him an ID to make bank transactions
 
+    stake_percent_rate = 0.3  # daily percentage of staking returns
+    
     def update_pairs(self):
         # TODO: UNDO THIS
 
@@ -203,9 +205,15 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         db.start_staking(self._bank_ID, value_usd, date)
 
     def return_stake(self):
-        value, = db.return_staked_value(self.user_id)
-
-
-
+        value, date_string = db.return_staked_value(self.user_id)
+        print(value, date_string)
+        date = datetime.datetime.fromisoformat(date_string)
+        today_date = datetime.datetime.now()
+        delta = today_date - date  # Difference in days since USD was staked
+        days_passed = delta.days
+        print("Days: ", days_passed)
+        value += value * (BankAccount.stake_percent_rate/100 * days_passed)  # Formula to calculate stake returns based on days of stake
+        print(value)
+        db.add_usd(value, self.user_id)
 
 
