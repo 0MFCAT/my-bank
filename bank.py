@@ -6,7 +6,7 @@ import requests
 import database as db
 from CMKapikey import API_KEY
 from custom_errors import *
-
+from tkinter import messagebox
 
 class User:
     all_users = []
@@ -92,20 +92,22 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
     stake_percent_rate = 0.003  # daily percentage of staking returns (0.3% daily)
     
     def update_pairs(self):
-        # TODO: UNDO THIS
 
-        '''# Calls the CoinMarketCap API to get the equivalent and updated pair values
+        # Calls the CoinMarketCap API to get the equivalent and updated pair values
         # URL of CoinMarketCap
         url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
         params = {'symbol': 'BTC,ETH', 'convert': 'USD'}
         # replace API_KEY with your personal API
         headers = {'X-CMC_PRO_API_KEY': API_KEY}
-        response = requests.get(url, params=params, headers=headers)
-        data = response.json()  # Getting the response data
-        self.pairBTC_USD = int(data['data']['BTC']['quote']['USD']['price'])
-        self.pairETH_USD = int(data['data']['ETH']['quote']['USD']['price'])'''
-        self.pairBTC_USD = 30000
-        self.pairETH_USD = 1000
+        try:
+            response = requests.get(url, params=params, headers=headers)
+            data = response.json()  # Getting the response data
+            self.pairBTC_USD = int(data['data']['BTC']['quote']['USD']['price'])
+            self.pairETH_USD = int(data['data']['ETH']['quote']['USD']['price'])
+        except KeyError:
+            messagebox.showerror("Login Error", "Wrong API_KEY value in config, please put your CoinMarket Cap API key in the CMKapikey.py file")
+        finally:
+            exit()
 
     @staticmethod
     def generate_id():
