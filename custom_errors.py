@@ -13,6 +13,16 @@ class WrongFormatID(Exception):
         self.message = message
 
 
-class StakeError(Exception):
+class WrongStakeID(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class StakeTimeError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class NoMultiStake(Exception):
     def __init__(self, message):
         self.message = message

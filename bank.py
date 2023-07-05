@@ -71,7 +71,6 @@ class User:
         # TODO: change the asserts in a way that if the user inputs any wrong value the GUI returns him a message explaining what went wrong
         try:
             db.add_user(first_name, last_name, year_of_birth, country, email, password)
-            # TODO: add the bank data to the table as well and assign the id to the user
         except ValueError:
             return False
 
@@ -90,7 +89,7 @@ class Admin(User):
 
 class BankAccount:  # Uses a User object and assign him an ID to make bank transactions
 
-    stake_percent_rate = 0.3  # daily percentage of staking returns
+    stake_percent_rate = 0.003  # daily percentage of staking returns (0.3% daily)
     
     def update_pairs(self):
         # TODO: UNDO THIS
@@ -149,6 +148,8 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         return value
 
     def send_usd(self, value: float, receiver_id: int):
+        if value <= 0:
+            raise ValueError("Value can't be negative or 0")
         if value >= self.usd:
             raise NoBalance("Not enough balance for that transaction")
         if len(str(receiver_id)) != 9:
@@ -158,6 +159,8 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         db.send(value, self.user_id, receiver_id)
 
     def exchange_to_usd(self, coin: str, value: float):
+        if value <= 0:
+            raise ValueError("Value can't be negative or 0")
         if coin == "CUP":
             if value >= self.cup:
                 raise NoBalance("Not enough balance for that transaction")
@@ -178,6 +181,8 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         db.to_usd(self.user_id, coin, value, value_usd)
 
     def exchange_from_usd(self, coin: str, value_usd: float):
+        if value_usd <= 0:
+            raise ValueError("Value can't be negative or 0")
         if value_usd > self.usd:
             raise NoBalance("Not enough balance for that transaction")
         if coin == "CUP":
@@ -200,20 +205,47 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
         self.eth = eth
 
     def stake(self, value_usd):
-        date = datetime.datetime.now().isoformat()
-        print(date)
-        db.start_staking(self._bank_ID, value_usd, date)
+        if value_usd <= self.usd:
+            date = datetime.datetime.now().isoformat()
+            db.start_staking(self._bank_ID, value_usd, date)
+        else:
+            raise NoBalance("Not enough balance for that transaction")
 
     def return_stake(self):
-        value, date_string = db.return_staked_value(self.user_id)
-        print(value, date_string)
+        if self.check_unstake_availability():
+            add_value = self.check_expected_return()
+            db.add_usd(add_value, self.user_id)
+            db.end_staked(self.user_id)
+
+    def check_staked_usd(self):
+        data = db.check_staked_values(self.user_id)
+        return data[0]
+
+    @staticmethod
+    def _days_since_staked(date_string):
         date = datetime.datetime.fromisoformat(date_string)
         today_date = datetime.datetime.now()
         delta = today_date - date  # Difference in days since USD was staked
         days_passed = delta.days
-        print("Days: ", days_passed)
-        value += value * (BankAccount.stake_percent_rate/100 * days_passed)  # Formula to calculate stake returns based on days of stake
-        print(value)
-        db.add_usd(value, self.user_id)
+        return days_passed
+
+    def check_expected_return(self):
+        value, date_string = db.check_staked_values(self.user_id)
+        days = self._days_since_staked(date_string)
+        value += value * (BankAccount.stake_percent_rate * days)
+        return value
+
+    def check_unstake_availability(self):
+        date_string = db.check_staked_values(self.user_id)[1]
+        days = self._days_since_staked(date_string)
+        if days >= 7:  # If days are less than 7 you can't unstake
+            print("True")
+            return True
+        else:
+            raise StakeTimeError(f"Only {days} days staked, need 7 days to unstake")
+
+
+
+
 
 

@@ -36,7 +36,9 @@ class Exchange_GUI:
         label_4.configure(text='to USD')
         label_4.grid(column=1, row=3)
         self.entry_2 = tk.Entry(labelframe_2)
-        self.entry_2.configure(justify="center", width=10)
+        entry2_var = tk.StringVar()
+        self.entry2_var = entry2_var
+        self.entry_2.configure(justify="center", width=10, textvariable=self.entry2_var)
         self.entry_2.grid(column=0, columnspan=2, pady="7 0", row=4)
         labelframe_2.grid(column=0, columnspan=2, row=3)
         labelframe_3 = tk.LabelFrame(labelframe_1)
@@ -53,8 +55,10 @@ class Exchange_GUI:
         button_1.configure(padx=20, text='Exchange')
         button_1.grid(column=0, columnspan=2, padx=5, pady="10 5", row=3)
         button_1.configure(command=self.exchanger_from_usd)
+        entry1_var = tk.StringVar()
+        self.entry1_var = entry1_var
         self.entry_1 = tk.Entry(labelframe_3)
-        self.entry_1.configure(justify="center", width=10)
+        self.entry_1.configure(justify="center", width=10, textvariable=self.entry1_var)
         self.entry_1.grid(column=0, columnspan=2, pady="7 0", row=2)
         labelframe_3.grid(column=0, pady="10 2", row=2)
         label_5 = tk.Label(labelframe_1)
@@ -80,6 +84,11 @@ class Exchange_GUI:
             messagebox.showinfo("Exchanged", f"You successfully exchanged {self.entry_2.get()} {self.tkvar1.get()} to USD.")
         except NoBalance:
             messagebox.showerror("No Balance", f"Not enough {self.tkvar1.get()} for that transaction")
+        except ValueError:
+            messagebox.showerror("Wrong Input", "The fields should contain valid numbers")
+        finally:
+            self.entry1_var.set("")
+            self.entry2_var.set("")
 
     def exchanger_from_usd(self):
         try:
@@ -87,5 +96,8 @@ class Exchange_GUI:
             messagebox.showinfo("Exchanged", f"You successfully exchanged {self.entry_1.get()} USD to {self.tkvar2.get()}.")
         except NoBalance:
             messagebox.showerror("No Balance", f"Not enough USD for that transaction")
-
-
+        except ValueError:
+            messagebox.showerror("Wrong Input", "The fields should contain valid numbers")
+        finally:
+            self.entry1_var.set("")
+            self.entry2_var.set("")

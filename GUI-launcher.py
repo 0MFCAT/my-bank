@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 import bank as bk
 from custom_errors import *
 from exchange_gui import *
+from stake_GUI import *
 
 root = Tk()
 root.withdraw()  # Hides the root windows until the user logs in
@@ -37,7 +38,7 @@ def bank_gui(main_bank_user, img):
                 # sends USD from main account to another account using the bank ID
                 main_bank_user.send_usd(float(entry_2.get()), int(entry_3.get()))
                 # TODO: fix the window so it doesn't minimize after enabling it again
-                messagebox.showinfo("Successful transaction", f"You have successfully sent {entry_2.get()} to the bank user with the ID: {entry_3.get()}") # TODO: Check This
+                messagebox.showinfo("Successful transaction", f"You have successfully sent {entry_2.get()} to the bank user with the ID: {entry_3.get()}")
                 cancel()
             except NoBalance:
                 messagebox.showerror("Not enough balance", "Insufficient founds for that transaction")
@@ -81,11 +82,9 @@ def bank_gui(main_bank_user, img):
         labelframe_1.grid(column=0, row=0)
 
     def stake_button():
-        try:
-            main_bank_user.stake(10)  # TODO: Make this a whole interface, now just testing
-            #main_bank_user.return_stake()
-        except StakeError:
-            messagebox.showerror("Stake Error", "You can't stake more than 1 time per account, need to unstake first")
+        root.attributes("-disabled", True)
+        stake_window = Stake_GUI(main_bank_user, root)
+        stake_window.run()
 
     def logout():
         root.withdraw()
@@ -219,7 +218,6 @@ def sign_up():
             bk.User.sign_up(entry3.get(), entry4.get(), int(entry5.get()), entry6.get(), entry7.get(), entry8.get())
             bk.BankAccount.initialize_bank(entry7.get())
             messagebox.showinfo("You are in", "You successfully created your account")
-            # TODO: close the screen and return to the logging screen
             toplevel1.destroy()
             logging.deiconify()
         except ValueError:

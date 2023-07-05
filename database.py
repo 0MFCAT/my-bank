@@ -52,13 +52,20 @@ def construct_user(user_email, user_password):
     return data
 
 
-# TODO: create construct_bank to retrieve the bank object data
 def add_user(first_name, last_name, year_of_birth, country, email, password):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute("INSERT INTO users VALUES (?,?,?,?,?,?)",
                    (first_name, last_name, year_of_birth, country, email, password))
 
+    conn.commit()
+    conn.close()
+
+
+def initialize_bank_data(bank_id, email):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO bank_data VALUES (?, 0, 0, 0, 0, 0, ?)", (bank_id, email))
     conn.commit()
     conn.close()
 
@@ -105,14 +112,6 @@ def check_id(bank_id):
     return data is not None
 
 
-def initialize_bank_data(bank_id, email):
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO bank_data VALUES (?, 0, 0, 0, 0, 0, ?)", (bank_id, email))
-    conn.commit()
-    conn.close()
-
-
 def to_usd(bank_id, coin, value_coin, value_usd):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
@@ -152,27 +151,31 @@ def start_staking(bank_id, value_usd, date):
     if not data_exist:
         cursor.execute("INSERT INTO stake_data VALUES (?,?,?)", (bank_id, value_usd, date))
     else:
-        raise StakeError("You can't stake more than 1 time per account, need to unstake first")
+        raise NoMultiStake("You can't stake more than 1 time per account, need to unstake first")
     conn.commit()
     conn.close()
     spend_usd(value_usd, bank_id)
-    
 
-def return_staked_value(bank_id):
+
+def end_staked(bank_id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE from stake_data WHERE bank_id = (?)", (bank_id,))
+    conn.commit()
+    conn.close()
+
+
+def check_staked_values(bank_id):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute(f"SELECT USD_staked, date FROM stake_data WHERE bank_id = (?)", (bank_id,))
-    data = cursor.fetchall()
+    data = cursor.fetchone()
     if data:
-        cursor.execute("DELETE from stake_data WHERE bank_id = (?)", (bank_id,))
-        conn.commit()
         conn.close()
-        return data[0]
+        return data
     else:
         conn.close()
-        raise StakeError("There is no staked value on the given ID")
-
-    
+        raise WrongStakeID("There is no staked value on the given ID")
 
 
 def main():
