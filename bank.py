@@ -106,8 +106,8 @@ class BankAccount:  # Uses a User object and assign him an ID to make bank trans
             self.pairETH_USD = int(data['data']['ETH']['quote']['USD']['price'])
         except KeyError:
             messagebox.showerror("Login Error", "Wrong API_KEY value in config, please put your CoinMarket Cap API key in the CMKapikey.py file")
-        finally:
             exit()
+
 
     @staticmethod
     def generate_id():
