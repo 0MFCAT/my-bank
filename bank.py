@@ -22,7 +22,7 @@ class User:
 
         self.first_name = first_name
         self.last_name = last_name
-        self._full_name = f"{first_name} {last_name}"  # Property TODO: chequear por que esto da error si le quito la _
+        self._full_name = f"{first_name} {last_name}"  # Property
         self.year_of_birth = year_of_birth
         self._age = datetime.date.today().year - year_of_birth
         self.country = country
